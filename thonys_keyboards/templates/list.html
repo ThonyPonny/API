@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Listado de Teclados</h1>
+
+<input type="text" id="search" placeholder="Buscar teclados..." class="search-bar">
+
+<table class="keyboards-table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        {% for keyboard in keyboards %}
+        <tr data-id="{{ keyboard.id }}">
+            <td>{{ keyboard.name }}</td>
+            <td>{{ keyboard.brand }}</td>
+            <td>${{ keyboard.price | round(2) }}</td>
+            <td class="actions">                                        
+                <!-- Botón Editar -->
+                <a href="/edit/{{ keyboard.id }}" class="btn-edit" title="Editar">✏️</a>
+                
+                <!-- Botón Eliminar - Versión corregida -->
+                <button class="btn-delete" title="Eliminar" onclick="deleteKeyboard(event, '{{ keyboard.id }}')">🗑️</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Script para manejar acciones -->
+<script>
+// Función para eliminar con DELETE
+async function deleteKeyboard(event, id) {
+    event.preventDefault();
+    if (confirm("¿Eliminar este teclado?")) {
+        try {
+            const response = await fetch(`/delete/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                event.closest('tr').remove();
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+}
+</script>
+<script>
+    async function submitEditForm(event, id) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        
+        try {
+            const response = await fetch(`/update/${id}`, {
+                method: 'PUT',
+                body: formData
+            });
+            if (response.ok) window.location.href = "/";
+        } catch (error) {
+            console.error("Error:", error);
+        }
+        return false;
+    }
+    </script>
+{% endblock %}
